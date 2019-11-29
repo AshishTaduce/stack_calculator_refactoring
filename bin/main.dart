@@ -32,7 +32,7 @@ int stackCalc(String inputString) {
   List<int> stack = [];
 
   for (String instr in listOfInstructions) {
-    print(instr);
+    //print(instr);
 
     if (isNumeric(instr)) {
       stack.add(int.parse(instr));
@@ -47,7 +47,7 @@ int stackCalc(String inputString) {
           'POP',
         ].contains(instr) &&
         stack.isNotEmpty) {
-      print(stack);
+      //print(stack);
 
       if (instr == 'POP') {
         stack.removeLast();
