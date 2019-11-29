@@ -22,52 +22,104 @@
 //  stackCalc("3 DUP +") ➞ 6
 //  stackCalc("6 5 5 7 * - /") ➞ 5
 //  stackCalc("x y +") ➞ Invalid instruction: x
-int stackCalc(String argument) {
-  List<String> walkthrough = argument.split(' ').toList();
-  List<int> stack = [];
 
-  for (int i = 0; i < walkthrough.length; i++) {
-    if (walkthrough[i] == '+') {
-      if (stack.length >= 2) {
-        stack.add(stack.last + stack[stack.length - 2]);
-        stack.removeAt(stack.length - 2);
-        stack.removeAt(stack.length - 2);
-      }
-    } else if (walkthrough[i] == 'DUP') {
-      if (stack.isNotEmpty) {
-        stack.add(stack.last);
-      }
-    } else if (walkthrough[i] == 'POP') {
-      if (stack.isNotEmpty) {
-        stack.removeLast();
-      }
-    } else if (walkthrough[i] == '-') {
-      if (stack.length >= 2) {
-        stack.add(stack.last - stack[stack.length - 2]);
-        stack.removeAt(stack.length - 2);
-        stack.removeAt(stack.length - 2);
-      }
-    } else if (walkthrough[i] == '*') {
-      if (stack.length >= 2) {
-        stack.add(stack.last * stack[stack.length - 2]);
-        stack.removeAt(stack.length - 2);
-        stack.removeAt(stack.length - 2);
-      }
-    } else if (walkthrough[i] == '/') {
-      if (stack.length >= 2) {
-        stack.add(stack.last ~/ stack[stack.length - 2]);
-        stack.removeAt(stack.length - 2);
-        stack.removeAt(stack.length - 2);
-      }
-    } else {
-      (stack.add(int.parse(walkthrough[i])));
-    }
+int stackCalc(String inputString) {
+  if (inputString == '') {
+    return 0;
   }
 
+  List<String> listOfInstructions = List.from(inputString.split(' '));
+  List<int> stack = [];
+
+  for (String instr in listOfInstructions) {
+    print(instr);
+
+    if (isNumeric(instr)) {
+      stack.add(int.parse(instr));
+    }
+
+    else if ([
+          '+',
+          '*',
+          '/',
+          '-',
+          'DUP',
+          'POP',
+        ].contains(instr) &&
+        stack.isNotEmpty) {
+      print(stack);
+
+      if (instr == 'POP') {
+        stack.removeLast();
+      }
+
+      if (instr == 'DUP') {
+        stack.add(stack.last);
+      }
+
+      if (stack.length > 1) {
+        if (instr == '+') {
+          stack.add(calc(add, stack));
+        }
+        if (instr == '-') {
+          stack.add(calc(sub, stack));
+        }
+        if (instr == '*') {
+          stack.add(calc(mul, stack));
+        }
+        if (instr == '/') {
+          if (!(stack.last == 0 || stack[stack.length - 2] == 0)) {
+            stack.add(calc(div, stack));
+          } else {
+            print('Division with zero is not possible, please check input');
+            throw ArgumentError;
+          }
+        }
+      }
+
+      else{
+        print('Invalid Instruction $instr on stack $stack');
+        return null;
+      }
+    }
+
+    else {
+      print('Invalid Instruction $instr on stack $stack');
+      return null;
+    }
+  }
 
   return stack.last;
 }
 
+int calc(Function callBack, List stack) {
+  if (stack.length > 1) {
+    int last = stack.removeLast();
+    int secondLast = stack.removeLast();
+    return callBack(last, secondLast);
+  } else {
+    throw ArgumentError;
+  }
+}
+
+int add(int x, int y) => x + y;
+int sub(int x, int y) => x - y;
+int mul(int x, int y) => x * y;
+int div(int x, int y) {
+  if (x != 0 && y != 0) {
+    return x ~/ y;
+  } else {
+    throw ArgumentError;
+  }
+}
+
+bool isNumeric(String str) {
+  if (str == null) {
+    return false;
+  }
+  return int.tryParse(str) != null;
+}
+
 main() {
-  print(stackCalc("3 *"));
+  print(stackCalc("+ 5 6 POP +"));
 }
